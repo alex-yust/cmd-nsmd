@@ -10,14 +10,15 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/model"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/nsm"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/nsmd"
-	"github.com/networkservicemesh/networkservicemesh/pkg/probes"
-	"github.com/networkservicemesh/cmd-nsmd/pkg/tools"
 	"github.com/networkservicemesh/sdk/pkg/tools/jaeger"
 	"github.com/networkservicemesh/sdk/pkg/tools/spanhelper"
-	"github.com/networkservicemesh/networkservicemesh/utils"
+
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/nsm"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/nsmd"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/probes"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools"
+	"github.com/networkservicemesh/cmd-nsmgr/utils"
 )
 
 var version string

@@ -1,1 +1,1 @@
-# cmd-nsmd
+# cmd-nsmgr
