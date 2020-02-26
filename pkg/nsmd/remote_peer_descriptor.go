@@ -20,9 +20,9 @@ import (
 	"context"
 	"sync"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/registry"
+	"github.com/networkservicemesh/api/pkg/api/registry"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/model"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
 )
 
 //RemotePeerDescriptor represents network service manager remote peer

@@ -7,36 +7,30 @@ import (
 	"sync"
 	"time"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/remote"
-
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/api/nsm"
-	remoteMonitor "github.com/networkservicemesh/networkservicemesh/controlplane/pkg/monitor/remote"
-
-	"github.com/pkg/errors"
-
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	"github.com/networkservicemesh/networkservicemesh/pkg/tools/spanhelper"
-
-	"github.com/networkservicemesh/networkservicemesh/pkg/probes"
-	"github.com/networkservicemesh/networkservicemesh/pkg/probes/health"
-
 	unified "github.com/networkservicemesh/api/pkg/api/networkservice"
-
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/crossconnect"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/nsmdapi"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/registry"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/model"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/nseregistry"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/serviceregistry"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/services"
-	"github.com/networkservicemesh/networkservicemesh/pkg/tools"
+	"github.com/networkservicemesh/api/pkg/api/nsmdapi"
+	"github.com/networkservicemesh/api/pkg/api/registry"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/nsm"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
+	remoteMonitor "github.com/networkservicemesh/cmd-nsmgr/pkg/monitor/remote"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/nseregistry"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/probes"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/probes/health"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/remote"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/serviceregistry"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/services"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools"
 	"github.com/networkservicemesh/networkservicemesh/sdk/monitor"
 	"github.com/networkservicemesh/networkservicemesh/sdk/monitor/connectionmonitor"
 	monitor_crossconnect "github.com/networkservicemesh/networkservicemesh/sdk/monitor/crossconnect"
+	"github.com/networkservicemesh/pkg/api/crossconnect"
+	"github.com/networkservicemesh/sdk/pkg/tools/spanhelper"
 )
 
 const (

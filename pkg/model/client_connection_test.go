@@ -8,8 +8,8 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/crossconnect"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/registry"
+	"github.com/networkservicemesh/api/pkg/api/crossconnect"
+	"github.com/networkservicemesh/api/pkg/api/registry"
 )
 
 func TestAddAndGetСс(t *testing.T) {

@@ -17,8 +17,8 @@ package remote
 import (
 	"github.com/networkservicemesh/api/pkg/api/networkservice"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/api/nsm"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/common"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/nsm"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/common"
 	"github.com/networkservicemesh/networkservicemesh/sdk/monitor/connectionmonitor"
 )
 

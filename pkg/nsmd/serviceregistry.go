@@ -19,13 +19,13 @@ import (
 	"github.com/networkservicemesh/api/pkg/api/registry"
 	"github.com/networkservicemesh/sdk/pkg/tools/spanhelper"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/nsmdapi"
+	"github.com/networkservicemesh/api/pkg/api/nsmdapi"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/serviceregistry"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/sid"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/vni"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/serviceregistry"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/sid"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/vni"
 	forwarderapi "github.com/networkservicemesh/api/forwarder"
-	"github.com/networkservicemesh/networkservicemesh/pkg/tools"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools"
 )
 
 const (

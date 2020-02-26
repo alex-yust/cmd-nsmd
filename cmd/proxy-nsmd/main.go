@@ -9,21 +9,21 @@ import (
 
 	"github.com/networkservicemesh/networkservicemesh/utils"
 
-	"github.com/networkservicemesh/networkservicemesh/pkg/probes/health"
-	"github.com/networkservicemesh/networkservicemesh/pkg/tools/jaeger"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/probes/health"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools/jaeger"
 
-	"github.com/networkservicemesh/networkservicemesh/pkg/probes"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/probes"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/nsmd"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/serviceregistry"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/nsmd"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/serviceregistry"
 	"github.com/networkservicemesh/networkservicemesh/sdk/monitor/remote"
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/connection"
-	unified "github.com/networkservicemesh/networkservicemesh/controlplane/api/networkservice"
-	proxynetworkserviceserver "github.com/networkservicemesh/networkservicemesh/controlplane/pkg/remote/proxy_network_service_server"
-	"github.com/networkservicemesh/networkservicemesh/pkg/tools"
+	"github.com/networkservicemesh/api/pkg/api/connection"
+	unified "github.com/networkservicemesh/api/pkg/api/networkservice"
+	proxynetworkserviceserver "github.com/networkservicemesh/cmd-nsmgr/pkg/remote/proxy_network_service_server"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools"
 )
 
 var version string

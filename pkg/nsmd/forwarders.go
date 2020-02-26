@@ -20,7 +20,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/networkservicemesh/networkservicemesh/pkg/tools/spanhelper"
+	"github.com/networkservicemesh/sdk/pkg/tools/spanhelper"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
@@ -29,10 +29,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/model"
-	forwarderapi "github.com/networkservicemesh/networkservicemesh/forwarder/api/forwarder"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
+	//forwarderapi "github.com/networkservicemesh/networkservicemesh/forwarder/api/forwarder"
 	forwarderregistrarapi "github.com/networkservicemesh/networkservicemesh/forwarder/api/forwarderregistrar"
-	"github.com/networkservicemesh/networkservicemesh/pkg/tools"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools"
 )
 
 const (
@@ -71,7 +71,7 @@ func forwarderMonitor(model model.Model, forwarderName string) {
 		return
 	}
 	defer conn.Close()
-	forwarderClient := forwarderapi.NewMechanismsMonitorClient(conn)
+	//forwarderClient := forwarderapi.NewMechanismsMonitorClient(conn)
 
 	// Looping indefinitely or until grpc returns an error indicating the other end closed connection.
 	stream, err := forwarderClient.MonitorMechanisms(context.Background(), &empty.Empty{})

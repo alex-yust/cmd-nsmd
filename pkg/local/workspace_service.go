@@ -21,7 +21,7 @@ import (
 
 	mechanismCommon "github.com/networkservicemesh/api/pkg/api/networkservice/mechanisms/common"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/common"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/common"
 
 	"github.com/networkservicemesh/api/pkg/api/networkservice"
 )

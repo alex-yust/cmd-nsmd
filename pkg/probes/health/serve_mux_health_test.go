@@ -7,7 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/networkservicemesh/networkservicemesh/pkg/tools"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools"
 
 	"github.com/onsi/gomega"
 )

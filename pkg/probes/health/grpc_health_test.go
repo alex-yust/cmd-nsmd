@@ -11,7 +11,7 @@ import (
 
 	"github.com/onsi/gomega"
 
-	"github.com/networkservicemesh/networkservicemesh/pkg/tools"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools"
 )
 
 func TestGrpcHealth(t *testing.T) {

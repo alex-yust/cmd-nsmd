@@ -23,7 +23,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/networkservicemesh/networkservicemesh/pkg/tools/spanhelper"
+	"github.com/networkservicemesh/sdk/pkg/tools/spanhelper"
 
 	"github.com/sirupsen/logrus"
 
@@ -31,10 +31,10 @@ import (
 
 	"github.com/networkservicemesh/api/pkg/api/networkservice"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/crossconnect"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/common"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/model"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/serviceregistry"
+	"github.com/networkservicemesh/api/pkg/api/crossconnect"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/common"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/serviceregistry"
 )
 
 const (

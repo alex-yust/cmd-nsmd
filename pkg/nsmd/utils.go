@@ -5,7 +5,7 @@ import (
 
 	"golang.org/x/sys/unix"
 
-	"github.com/networkservicemesh/networkservicemesh/pkg/tools"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools"
 )
 
 type customListener struct {

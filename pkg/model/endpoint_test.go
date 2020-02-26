@@ -8,7 +8,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/registry"
+	"github.com/networkservicemesh/api/pkg/api/registry"
 )
 
 func TestAddAndGetEndpoint(t *testing.T) {

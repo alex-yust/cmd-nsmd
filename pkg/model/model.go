@@ -7,8 +7,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/registry"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/selector"
+	"github.com/networkservicemesh/api/pkg/api/registry"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/selector"
 )
 
 type Model interface {

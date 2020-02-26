@@ -5,7 +5,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/registry"
+	"github.com/networkservicemesh/api/pkg/api/registry"
 )
 
 // Endpoint structure in Model that describes NetworkServiceEndpoint

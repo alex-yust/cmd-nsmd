@@ -18,8 +18,8 @@ package nsmd
 import (
 	"context"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/registry"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/serviceregistry"
+	"github.com/networkservicemesh/api/pkg/api/registry"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/serviceregistry"
 )
 
 type networkServiceDiscoveryServer struct {

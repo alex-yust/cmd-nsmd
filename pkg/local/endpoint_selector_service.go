@@ -25,11 +25,11 @@ import (
 
 	"github.com/networkservicemesh/api/pkg/api/networkservice"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/registry"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/api/nsm"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/common"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/model"
-	"github.com/networkservicemesh/networkservicemesh/pkg/tools/spanhelper"
+	"github.com/networkservicemesh/api/pkg/api/registry"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/nsm"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/common"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
+	"github.com/networkservicemesh/sdk/pkg/tools/spanhelper"
 )
 
 // ConnectionService makes basic Mechanism selection for the incoming connection

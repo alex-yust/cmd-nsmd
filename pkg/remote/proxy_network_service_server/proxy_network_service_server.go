@@ -8,7 +8,7 @@ import (
 
 	"github.com/networkservicemesh/api/pkg/api/networkservice/mechanisms/vxlan"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/common"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/common"
 
 	"github.com/pkg/errors"
 
@@ -20,10 +20,10 @@ import (
 
 	"github.com/networkservicemesh/api/pkg/api/networkservice"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/clusterinfo"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/registry"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/serviceregistry"
-	"github.com/networkservicemesh/networkservicemesh/pkg/tools"
+	"github.com/networkservicemesh/api/pkg/api/clusterinfo"
+	"github.com/networkservicemesh/api/pkg/api/registry"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/serviceregistry"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools"
 )
 
 // Default values and environment variables of proxy connection

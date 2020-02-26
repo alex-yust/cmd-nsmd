@@ -17,7 +17,7 @@ package local
 import (
 	"context"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/properties"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/properties"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -25,16 +25,16 @@ import (
 	mechanismCommon "github.com/networkservicemesh/api/pkg/api/networkservice/mechanisms/common"
 	"github.com/networkservicemesh/api/pkg/api/networkservice/mechanisms/kernel"
 
-	"github.com/networkservicemesh/networkservicemesh/pkg/tools/spanhelper"
+	"github.com/networkservicemesh/sdk/pkg/tools/spanhelper"
 
 	"github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/networkservicemesh/api/pkg/api/networkservice"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/registry"
-	unifiednsm "github.com/networkservicemesh/networkservicemesh/controlplane/pkg/api/nsm"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/common"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/model"
+	"github.com/networkservicemesh/api/pkg/api/registry"
+	unifiednsm "github.com/networkservicemesh/cmd-nsmgr/pkg/api/nsm"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/common"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
 )
 
 // ConnectionService makes basic Mechanism selection for the incoming connection
