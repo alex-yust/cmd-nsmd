@@ -22,7 +22,7 @@ import (
 	"sync"
 	"time"
 
-	connectionMonitor "github.com/networkservicemesh/networkservicemesh/sdk/monitor/connectionmonitor"
+	connectionMonitor "github.com/networkservicemesh/cmd-nsmgr/sdk/monitor/connectionmonitor"
 
 	"google.golang.org/grpc"
 

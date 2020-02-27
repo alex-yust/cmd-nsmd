@@ -7,23 +7,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/networkservicemesh/networkservicemesh/utils"
-
-	"github.com/networkservicemesh/cmd-nsmgr/pkg/probes/health"
-	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools/jaeger"
-
-	"github.com/networkservicemesh/cmd-nsmgr/pkg/probes"
-
-	"github.com/networkservicemesh/cmd-nsmgr/pkg/nsmd"
-	"github.com/networkservicemesh/cmd-nsmgr/pkg/serviceregistry"
-	"github.com/networkservicemesh/networkservicemesh/sdk/monitor/remote"
-
+	"github.com/networkservicemesh/api/pkg/api/networkservice"
+	"github.com/networkservicemesh/sdk/pkg/tools/jaeger"
 	"github.com/sirupsen/logrus"
 
-	"github.com/networkservicemesh/api/pkg/api/connection"
-	unified "github.com/networkservicemesh/api/pkg/api/networkservice"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/nsmd"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/probes"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/probes/health"
 	proxynetworkserviceserver "github.com/networkservicemesh/cmd-nsmgr/pkg/remote/proxy_network_service_server"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/serviceregistry"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools"
+	"github.com/networkservicemesh/cmd-nsmgr/sdk/monitor/remote"
+	"github.com/networkservicemesh/cmd-nsmgr/utils"
 )
 
 var version string
@@ -85,11 +80,11 @@ func getProxyNSMDAPIAddress() string {
 func startAPIServerAt(sock net.Listener, serviceRegistry serviceregistry.ServiceRegistry, probes probes.Probes) {
 	grpcServer := tools.NewServer(context.Background())
 	remoteConnectionMonitor := remote.NewProxyMonitorServer()
-	connection.RegisterMonitorConnectionServer(grpcServer, remoteConnectionMonitor)
+	networkservice.RegisterMonitorConnectionServer(grpcServer, remoteConnectionMonitor)
 	probes.Append(health.NewGrpcHealth(grpcServer, sock.Addr(), time.Minute))
 	// Register Remote NetworkServiceManager
 	remoteServer := proxynetworkserviceserver.NewProxyNetworkServiceServer(serviceRegistry)
-	unified.RegisterNetworkServiceServer(grpcServer, remoteServer)
+	networkservice.RegisterNetworkServiceServer(grpcServer, remoteServer)
 
 	go func() {
 		if err := grpcServer.Serve(sock); err != nil {

@@ -7,7 +7,7 @@ import (
 
 	"github.com/networkservicemesh/api/pkg/api/networkservice"
 
-	"github.com/networkservicemesh/networkservicemesh/utils/caddyfile"
+	"github.com/networkservicemesh/cmd-nsmgr/utils/caddyfile"
 )
 
 const anyDomain = "."

@@ -4,18 +4,15 @@ import (
 	"net"
 	"time"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/sid"
-
+	"github.com/networkservicemesh/api/pkg/api/networkservice"
 	"golang.org/x/net/context"
-
 	"google.golang.org/grpc"
 
-	"github.com/networkservicemesh/api/pkg/api/networkservice"
-
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/nsmdapi"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/registry"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/model"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/vni"
+	"github.com/networkservicemesh/api/pkg/api/registry"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/nsmdapi"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/sid"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/vni"
 	forwarderapi "github.com/networkservicemesh/networkservicemesh/forwarder/api/forwarder"
 )
 

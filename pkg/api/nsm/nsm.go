@@ -17,19 +17,16 @@ package nsm
 import (
 	"time"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/properties"
-
 	"github.com/networkservicemesh/api/pkg/api/networkservice"
-
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/crossconnect"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/model"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/serviceregistry"
-	"github.com/networkservicemesh/networkservicemesh/sdk/monitor/connectionmonitor"
-	crossconnect_monitor "github.com/networkservicemesh/networkservicemesh/sdk/monitor/crossconnect"
-
+	"github.com/networkservicemesh/api/pkg/api/registry"
 	"golang.org/x/net/context"
 
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/registry"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/crossconnect"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/properties"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/serviceregistry"
+	"github.com/networkservicemesh/cmd-nsmgr/sdk/monitor/connectionmonitor"
+	crossconnect_monitor "github.com/networkservicemesh/cmd-nsmgr/sdk/monitor/crossconnect"
 )
 
 // ClientConnection is an interface for client connection

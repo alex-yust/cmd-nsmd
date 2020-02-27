@@ -17,19 +17,15 @@ package nsmd
 import (
 	"time"
 
-	"github.com/networkservicemesh/networkservicemesh/utils"
-
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/pkg/errors"
-
 	"github.com/networkservicemesh/sdk/pkg/tools/spanhelper"
-
-	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
-
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 
 	"github.com/networkservicemesh/api/pkg/api/registry"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
+	"github.com/networkservicemesh/cmd-nsmgr/utils"
 )
 
 const (

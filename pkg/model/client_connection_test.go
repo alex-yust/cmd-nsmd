@@ -8,7 +8,7 @@ import (
 
 	. "github.com/onsi/gomega"
 
-	"github.com/networkservicemesh/api/pkg/api/crossconnect"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/crossconnect"
 	"github.com/networkservicemesh/api/pkg/api/registry"
 )
 

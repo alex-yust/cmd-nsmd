@@ -6,24 +6,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/networkservicemesh/api/pkg/api/networkservice/mechanisms/vxlan"
-
-	"github.com/networkservicemesh/cmd-nsmgr/pkg/common"
-
-	"github.com/pkg/errors"
-
-	"github.com/networkservicemesh/networkservicemesh/utils/interdomain"
-
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/networkservicemesh/api/pkg/api/networkservice"
+	"github.com/networkservicemesh/api/pkg/api/networkservice/mechanisms/vxlan"
+	"github.com/networkservicemesh/api/pkg/api/registry"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 
-	"github.com/networkservicemesh/api/pkg/api/networkservice"
-
-	"github.com/networkservicemesh/api/pkg/api/clusterinfo"
-	"github.com/networkservicemesh/api/pkg/api/registry"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/clusterinfo"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/common"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/serviceregistry"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools"
+	"github.com/networkservicemesh/cmd-nsmgr/utils/interdomain"
 )
 
 // Default values and environment variables of proxy connection

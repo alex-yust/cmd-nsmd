@@ -29,7 +29,7 @@ import (
 	"github.com/networkservicemesh/api/pkg/api/networkservice/mechanisms/srv6"
 	"github.com/networkservicemesh/api/pkg/api/networkservice/mechanisms/vxlan"
 
-	"github.com/networkservicemesh/api/pkg/api/crossconnect"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/crossconnect"
 	"github.com/networkservicemesh/api/pkg/api/registry"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/nsm"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/common"
@@ -38,7 +38,7 @@ import (
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/properties"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/serviceregistry"
 	"github.com/networkservicemesh/sdk/pkg/tools/spanhelper"
-	"github.com/networkservicemesh/networkservicemesh/sdk/monitor/connectionmonitor"
+	"github.com/networkservicemesh/cmd-nsmgr/sdk/monitor/connectionmonitor"
 )
 
 const (

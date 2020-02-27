@@ -28,12 +28,12 @@ import (
 	"github.com/networkservicemesh/api/pkg/api/networkservice/mechanisms/srv6"
 	"github.com/networkservicemesh/api/pkg/api/networkservice/mechanisms/vxlan"
 
-	"github.com/networkservicemesh/api/pkg/api/crossconnect"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/crossconnect"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/common"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/serviceregistry"
+	"github.com/networkservicemesh/cmd-nsmgr/utils"
 	"github.com/networkservicemesh/sdk/pkg/tools/spanhelper"
-	"github.com/networkservicemesh/networkservicemesh/utils"
 )
 
 const (

@@ -7,10 +7,10 @@ import (
 
 	"github.com/networkservicemesh/api/pkg/api/networkservice"
 
-	"github.com/networkservicemesh/api/pkg/api/crossconnect"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/crossconnect"
 	"github.com/networkservicemesh/api/pkg/api/registry"
 	"github.com/networkservicemesh/sdk/pkg/tools/spanhelper"
-	"github.com/networkservicemesh/networkservicemesh/sdk/monitor/connectionmonitor"
+	"github.com/networkservicemesh/cmd-nsmgr/sdk/monitor/connectionmonitor"
 )
 
 // ClientConnectionState describes state of ClientConnection

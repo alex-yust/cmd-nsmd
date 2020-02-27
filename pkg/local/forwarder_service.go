@@ -31,7 +31,7 @@ import (
 
 	"github.com/networkservicemesh/api/pkg/api/networkservice"
 
-	"github.com/networkservicemesh/api/pkg/api/crossconnect"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/crossconnect"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/common"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/serviceregistry"

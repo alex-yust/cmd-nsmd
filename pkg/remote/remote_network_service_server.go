@@ -19,7 +19,7 @@ import (
 
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/nsm"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/common"
-	"github.com/networkservicemesh/networkservicemesh/sdk/monitor/connectionmonitor"
+	"github.com/networkservicemesh/cmd-nsmgr/sdk/monitor/connectionmonitor"
 )
 
 // NewRemoteNetworkServiceServer -  creates a new remote.NetworkServiceServer

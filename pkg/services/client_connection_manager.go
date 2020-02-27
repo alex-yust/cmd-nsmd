@@ -5,25 +5,19 @@ import (
 	"sync"
 	"time"
 
+	"github.com/networkservicemesh/api/pkg/api/networkservice"
 	mechanismCommon "github.com/networkservicemesh/api/pkg/api/networkservice/mechanisms/common"
-
 	"github.com/networkservicemesh/api/pkg/api/networkservice/mechanisms/kernel"
-
+	"github.com/networkservicemesh/api/pkg/api/registry"
+	"github.com/networkservicemesh/sdk/pkg/tools/spanhelper"
 	"github.com/pkg/errors"
-
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/common"
-
-	"github.com/networkservicemesh/networkservicemesh/pkg/tools/spanhelper"
-
 	"github.com/sirupsen/logrus"
 
-	"github.com/networkservicemesh/api/pkg/api/networkservice"
-
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/crossconnect"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/api/registry"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/api/nsm"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/model"
-	"github.com/networkservicemesh/networkservicemesh/controlplane/pkg/serviceregistry"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/crossconnect"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/nsm"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/common"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/serviceregistry"
 )
 
 const (

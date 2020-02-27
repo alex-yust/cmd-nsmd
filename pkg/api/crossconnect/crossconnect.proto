@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package crossconnect;
+
+option go_package = "github.com/networkservicemesh/cmd-nsmgr/pkg/api/crossconnect";
+
+import "connection.proto";
+import "ptypes/empty/empty.proto";
+
+enum CrossConnectEventType {
+  INITIAL_STATE_TRANSFER = 0;
+  UPDATE = 1;
+  DELETE = 2;
+}
+message Metrics { map<string, string> metrics = 1; }
+message CrossConnectEvent {
+  CrossConnectEventType type = 1;
+  map<string, CrossConnect> cross_connects = 2;
+  map<string, Metrics> metrics = 3;
+}
+
+message CrossConnect {
+  string id = 1;
+  string payload = 2;
+
+  connection.Connection source = 4;
+  connection.Connection destination = 7;
+}
+
+service MonitorCrossConnect {
+  rpc MonitorCrossConnects(google.protobuf.Empty)
+      returns (stream crossconnect.CrossConnectEvent);
+}

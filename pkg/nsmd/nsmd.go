@@ -8,15 +8,16 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	unified "github.com/networkservicemesh/api/pkg/api/networkservice"
+	"github.com/networkservicemesh/api/pkg/api/registry"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	unified "github.com/networkservicemesh/api/pkg/api/networkservice"
-	"github.com/networkservicemesh/api/pkg/api/nsmdapi"
-	"github.com/networkservicemesh/api/pkg/api/registry"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/crossconnect"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/nsm"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/nsmdapi"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
 	remoteMonitor "github.com/networkservicemesh/cmd-nsmgr/pkg/monitor/remote"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/nseregistry"
@@ -26,10 +27,9 @@ import (
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/serviceregistry"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/services"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools"
-	"github.com/networkservicemesh/networkservicemesh/sdk/monitor"
-	"github.com/networkservicemesh/networkservicemesh/sdk/monitor/connectionmonitor"
-	monitor_crossconnect "github.com/networkservicemesh/networkservicemesh/sdk/monitor/crossconnect"
-	"github.com/networkservicemesh/pkg/api/crossconnect"
+	"github.com/networkservicemesh/cmd-nsmgr/sdk/monitor"
+	"github.com/networkservicemesh/cmd-nsmgr/sdk/monitor/connectionmonitor"
+	monitor_crossconnect "github.com/networkservicemesh/cmd-nsmgr/sdk/monitor/crossconnect"
 	"github.com/networkservicemesh/sdk/pkg/tools/spanhelper"
 )
 

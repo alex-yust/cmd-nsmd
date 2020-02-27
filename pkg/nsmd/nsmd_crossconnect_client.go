@@ -20,7 +20,7 @@ import (
 	"sync"
 	"time"
 
-	connectionMonitor "github.com/networkservicemesh/networkservicemesh/sdk/monitor/connectionmonitor"
+	connectionMonitor "github.com/networkservicemesh/cmd-nsmgr/sdk/monitor/connectionmonitor"
 
 	"github.com/networkservicemesh/sdk/pkg/tools/spanhelper"
 
@@ -34,12 +34,12 @@ import (
 
 	"github.com/networkservicemesh/api/pkg/api/networkservice"
 
-	"github.com/networkservicemesh/api/pkg/api/crossconnect"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/crossconnect"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/services"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools"
-	"github.com/networkservicemesh/networkservicemesh/sdk/monitor"
-	monitor_crossconnect "github.com/networkservicemesh/networkservicemesh/sdk/monitor/crossconnect"
+	"github.com/networkservicemesh/cmd-nsmgr/sdk/monitor"
+	monitor_crossconnect "github.com/networkservicemesh/cmd-nsmgr/sdk/monitor/crossconnect"
 )
 
 const (
