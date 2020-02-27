@@ -18,20 +18,15 @@ import (
 	"context"
 	"net"
 	"path"
-	"time"
 
 	"github.com/networkservicemesh/sdk/pkg/tools/spanhelper"
 
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/status"
 
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
-	//forwarderapi "github.com/networkservicemesh/networkservicemesh/forwarder/api/forwarder"
-	forwarderregistrarapi "github.com/networkservicemesh/networkservicemesh/forwarder/api/forwarderregistrar"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools"
 )
 
@@ -72,57 +67,43 @@ func forwarderMonitor(model model.Model, forwarderName string) {
 	}
 	defer conn.Close()
 	//forwarderClient := forwarderapi.NewMechanismsMonitorClient(conn)
-
-	// Looping indefinitely or until grpc returns an error indicating the other end closed connection.
-	stream, err := forwarderClient.MonitorMechanisms(context.Background(), &empty.Empty{})
-	if err != nil {
-		logrus.Errorf("fail to create update grpc channel for Forwarder %s with error: %+v, removing forwarder from Objectstore.", forwarder.RegisteredName, err)
-		model.DeleteForwarder(context.Background(), forwarderName)
-		return
-	}
-	for {
-		updates, err := stream.Recv()
-		if err != nil {
-			logrus.Errorf("fail to receive on update grpc channel for Forwarder %s with error: %+v, removing forwarder from Objectstore.", forwarder.RegisteredName, err)
-			model.DeleteForwarder(context.Background(), forwarderName)
-			return
-		}
-		logrus.Infof("Forwarder %s informed of its parameters changes, applying new parameters %+v", forwarderName, updates.RemoteMechanisms)
-		// TODO: this is not good -- direct model changes
-		forwarder.SetRemoteMechanisms(updates.RemoteMechanisms)
-		forwarder.SetLocalMechanisms(updates.LocalMechanisms)
-		forwarder.MechanismsConfigured = true
-		model.UpdateForwarder(context.Background(), forwarder)
-	}
-}
-
-// RequestLiveness is a stream initiated by NSM to inform the forwarder that NSM is still alive and
-// no re-registration is required. Detection a failure on this "channel" will mean
-// that NSM is gone and the forwarder needs to start re-registration logic.
-func (r *ForwarderRegistrarServer) RequestLiveness(liveness forwarderregistrarapi.ForwarderRegistration_RequestLivenessServer) error {
-	logrus.Infof("Liveness Request received")
-	for {
-		if err := liveness.SendMsg(&empty.Empty{}); err != nil {
-			logrus.Errorf("deteced error %s, grpc code: %+v on grpc channel", err.Error(), status.Convert(err).Code())
-			return err
-		}
-		time.Sleep(time.Second * livenessInterval)
-	}
+	//
+	//// Looping indefinitely or until grpc returns an error indicating the other end closed connection.
+	//stream, err := forwarderClient.MonitorMechanisms(context.Background(), &empty.Empty{})
+	//if err != nil {
+	//	logrus.Errorf("fail to create update grpc channel for Forwarder %s with error: %+v, removing forwarder from Objectstore.", forwarder.RegisteredName, err)
+	//	model.DeleteForwarder(context.Background(), forwarderName)
+	//	return
+	//}
+	//for {
+	//	updates, err := stream.Recv()
+	//	if err != nil {
+	//		logrus.Errorf("fail to receive on update grpc channel for Forwarder %s with error: %+v, removing forwarder from Objectstore.", forwarder.RegisteredName, err)
+	//		model.DeleteForwarder(context.Background(), forwarderName)
+	//		return
+	//	}
+	//	logrus.Infof("Forwarder %s informed of its parameters changes, applying new parameters %+v", forwarderName, updates.RemoteMechanisms)
+	//	// TODO: this is not good -- direct model changes
+	//	forwarder.SetRemoteMechanisms(updates.RemoteMechanisms)
+	//	forwarder.SetLocalMechanisms(updates.LocalMechanisms)
+	//	forwarder.MechanismsConfigured = true
+	//	model.UpdateForwarder(context.Background(), forwarder)
+	//}
 }
 
 // RequestForwarderRegistration - request forwarder to be registered.
-func (r *ForwarderRegistrarServer) RequestForwarderRegistration(ctx context.Context, req *forwarderregistrarapi.ForwarderRegistrationRequest) (*forwarderregistrarapi.ForwarderRegistrationReply, error) {
-	logrus.Infof("Received new forwarder registration requests from %s", req.ForwarderName)
+func (r *ForwarderRegistrarServer) RequestForwarderRegistration(ctx context.Context, name, socket string) error {
+	logrus.Infof("Received new forwarder registration requests from %s", name)
 	// Need to check if name of forwarder already exists in the object store
-	if r.model.GetForwarder(req.ForwarderName) != nil {
-		logrus.Errorf("forwarder with name %s already exist", req.ForwarderName)
+	if r.model.GetForwarder(name) != nil {
+		logrus.Errorf("forwarder with name %s already exist", name)
 		// TODO (sbezverk) Need to decide the right action, fail or not, failing for now
-		return &forwarderregistrarapi.ForwarderRegistrationReply{Registered: false}, errors.Errorf("forwarder with name %s already registered", req.ForwarderName)
+		return errors.Errorf("forwarder with name %s already registered", name)
 	}
 	// Instantiating forwarder object with parameters from the request and creating a new object in the Object store
 	forwarder := &model.Forwarder{
-		RegisteredName: req.ForwarderName,
-		SocketLocation: req.ForwarderSocket,
+		RegisteredName: name,
+		SocketLocation: socket,
 	}
 
 	r.model.AddForwarder(ctx, forwarder)
@@ -130,19 +111,19 @@ func (r *ForwarderRegistrarServer) RequestForwarderRegistration(ctx context.Cont
 	// Starting per forwarder go routine which will open grpc client connection on forwarder advertised socket
 	// and will listen for operational parameters/constraints changes and reflecting these changes in the forwarder
 	// object.
-	go forwarderMonitor(r.model, req.ForwarderName)
+	go forwarderMonitor(r.model, name)
 
-	return &forwarderregistrarapi.ForwarderRegistrationReply{Registered: true}, nil
+	return nil
 }
 
 // RequestForwarderUnRegistration - request forwarder to be unregistered
-func (r *ForwarderRegistrarServer) RequestForwarderUnRegistration(ctx context.Context, req *forwarderregistrarapi.ForwarderUnRegistrationRequest) (*forwarderregistrarapi.ForwarderUnRegistrationReply, error) {
-	logrus.Infof("Received forwarder un-registration requests from %s", req.ForwarderName)
+func (r *ForwarderRegistrarServer) RequestForwarderUnRegistration(ctx context.Context, name string) error {
+	logrus.Infof("Received forwarder un-registration requests from %s", name)
 
 	// Removing forwarder from the store, if it does not exists, it does not matter as long as it is no longer there.
-	r.model.DeleteForwarder(ctx, req.ForwarderName)
+	r.model.DeleteForwarder(ctx, name)
 
-	return &forwarderregistrarapi.ForwarderUnRegistrationReply{UnRegistered: true}, nil
+	return nil
 }
 
 // startForwarderServer starts for a server listening for local NSEs advertise/remove
@@ -166,9 +147,9 @@ func (r *ForwarderRegistrarServer) startForwarderRegistrarServer(ctx context.Con
 	}
 
 	// Plugging forwarder registrar operations methods
-	forwarderregistrarapi.RegisterForwarderRegistrationServer(r.grpcServer, r)
+	//forwarderregistrarapi.RegisterForwarderRegistrationServer(r.grpcServer, r)
 	// Plugging forwarder registrar operations methods
-	forwarderregistrarapi.RegisterForwarderUnRegistrationServer(r.grpcServer, r)
+	//forwarderregistrarapi.RegisterForwarderUnRegistrationServer(r.grpcServer, r)
 
 	span.Logger().Infof("Starting Forwarder Registrar gRPC server listening on socket: %s", forwarderRegistrar)
 	go func() {

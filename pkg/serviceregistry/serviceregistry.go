@@ -13,7 +13,7 @@ import (
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/sid"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/vni"
-	forwarderapi "github.com/networkservicemesh/networkservicemesh/forwarder/api/forwarder"
+	forwarderapi "github.com/networkservicemesh/cmd-nsmgr/pkg/api/forwarder"
 )
 
 type ApiRegistry interface {

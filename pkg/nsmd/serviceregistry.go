@@ -9,23 +9,21 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
-
 
 	"github.com/networkservicemesh/api/pkg/api/networkservice"
 	"github.com/networkservicemesh/api/pkg/api/registry"
 	"github.com/networkservicemesh/sdk/pkg/tools/spanhelper"
 
-	"github.com/networkservicemesh/api/pkg/api/nsmdapi"
+	forwarderapi "github.com/networkservicemesh/cmd-nsmgr/pkg/api/forwarder"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/api/nsmdapi"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/model"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/serviceregistry"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/sid"
-	"github.com/networkservicemesh/cmd-nsmgr/pkg/vni"
-	forwarderapi "github.com/networkservicemesh/api/forwarder"
 	"github.com/networkservicemesh/cmd-nsmgr/pkg/tools"
+	"github.com/networkservicemesh/cmd-nsmgr/pkg/vni"
 )
 
 const (
