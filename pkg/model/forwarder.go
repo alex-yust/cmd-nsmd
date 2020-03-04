@@ -106,15 +106,10 @@ func (d *forwarderDomain) UpdateForwarder(ctx context.Context, dp *Forwarder) {
 func (d *forwarderDomain) SelectForwarder(forwarderSelector func(dp *Forwarder) bool) (*Forwarder, error) {
 	var rv *Forwarder
 	d.kvRange(func(key string, value interface{}) bool {
-		dp := value.(*Forwarder)
+		fwd := value.(*Forwarder)
 
-		if forwarderSelector == nil {
-			rv = dp
-			return false
-		}
-
-		if forwarderSelector(dp) {
-			rv = dp
+		if forwarderSelector == nil || forwarderSelector(fwd) {
+			rv = fwd
 			return false
 		}
 

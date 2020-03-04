@@ -233,11 +233,11 @@ func (impl *nsmdServiceRegistry) WaitForForwarderAvailable(ctx context.Context, 
 	span.Logger().Info("Waiting for forwarder available...")
 
 	st := time.Now()
-	checkConfigured := func(dp *model.Forwarder) bool {
-		return dp.MechanismsConfigured
+	checkConfigured := func(fwd *model.Forwarder) bool {
+		return fwd.MechanismsConfigured
 	}
 	for ; true; <-time.After(100 * time.Millisecond) {
-		if dp, _ := mdl.SelectForwarder(checkConfigured); dp != nil {
+		if fwd, _ := mdl.SelectForwarder(checkConfigured); fwd != nil {
 			// We have configured monitor
 			return nil
 		}

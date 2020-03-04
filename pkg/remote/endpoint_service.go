@@ -59,13 +59,13 @@ func (cce *endpointService) closeEndpoint(ctx context.Context, cc *model.ClientC
 	closeCtx, closeCancel := context.WithTimeout(ctx, cce.props.CloseTimeout)
 	defer closeCancel()
 
-	client, nseClientError := cce.nseManager.CreateNSEClient(closeCtx, cc.Endpoint)
+	nseClient, nseClientError := cce.nseManager.CreateNSEClient(closeCtx, cc.Endpoint)
 
-	if client != nil {
+	if nseClient != nil {
 		if ld := cc.Xcon.GetLocalDestination(); ld != nil {
-			return client.Close(ctx, ld)
+			return nseClient.Close(ctx, ld)
 		}
-		err := client.Cleanup()
+		err := nseClient.Cleanup()
 		span.LogError(err)
 	} else {
 		span.LogError(nseClientError)

@@ -17,6 +17,7 @@ package local
 import (
 	"context"
 	"fmt"
+	"github.com/networkservicemesh/api/pkg/api/registry"
 	"time"
 
 	"github.com/networkservicemesh/api/pkg/api/networkservice/mechanisms/srv6"
@@ -54,17 +55,52 @@ type forwarderService struct {
 	model           model.Model
 }
 
-func (cce *forwarderService) selectForwarder(request *networkservice.NetworkServiceRequest) (*model.Forwarder, error) {
-	dp, err := cce.model.SelectForwarder(func(dp *model.Forwarder) bool {
+func (cce *forwarderService) selectForwarder(ctx context.Context, request *networkservice.NetworkServiceRequest) (*model.Forwarder, error) {
+	//
+	discoveryClient, err := cce.serviceRegistry.DiscoveryClient(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to connect to Discovery service")
+	}
+	findResponce, err := discoveryClient.FindNetworkService(ctx,
+		&registry.FindNetworkServiceRequest{
+			// TODO: elaborate the NSE name for forwarders on the node
+			NetworkServiceName:"forwarder@node-ip-address",
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	if len(findResponce.NetworkServiceEndpoints) == 0 {
+		return nil, errors.New("Zero forwarders found")
+	}
+
+	// TODO: RoundRobin selection of xNSE
+	for _, xNSE := range findResponce.NetworkServiceEndpoints {
 		for _, m := range request.GetRequestMechanismPreferences() {
-			if cce.findMechanism(dp.LocalMechanisms, m.GetType()) != nil {
-				return true
+			if cce.findMechanism(xNSE.LocalMechanisms, m.GetType()) != nil {
+				logrus.Infof("forwarder selected: %v", xNSE)
+				fwd := &model.Forwarder{
+					RegisteredName:       "",
+					SocketLocation:       "",
+					LocalMechanisms:      nil,
+					RemoteMechanisms:     nil,
+					MechanismsConfigured: false,
+				}
+				return fwd, nil
 			}
 		}
-		return false
-	})
-	return dp, err
+	}
+	//fwd, err := cce.model.SelectForwarder(func(fwd *model.Forwarder) bool {
+	//	for _, m := range request.GetRequestMechanismPreferences() {
+	//		if cce.findMechanism(fwd.LocalMechanisms, m.GetType()) != nil {
+	//			return true
+	//		}
+	//	}
+	//	return false
+	//})
+	return nil, errors.Errorf("Failed to find forwarder for request: %v", request)
 }
+
 func (cce *forwarderService) findMechanism(mechanismPreferences []*networkservice.Mechanism, mechanismType string) *networkservice.Mechanism {
 	for _, m := range mechanismPreferences {
 		if m.GetType() == mechanismType {
@@ -107,28 +143,28 @@ func (cce *forwarderService) Request(ctx context.Context, request *networkservic
 	}
 
 	// TODO: We could iterate forwarders to match required one, if failed with first one.
-	dp, err := cce.selectForwarder(request)
+	fwd, err := cce.selectForwarder(ctx, request)
 	if err != nil {
 		return nil, err
 	}
 
 	// 5. Select a local forwarder and put it into conn object
-	err = cce.updateMechanism(request, dp)
+	err = cce.updateMechanism(request, fwd)
 	if err != nil {
 		return nil, errors.Errorf("NSM:(5.1) %v", err)
 	}
 
-	span.LogObject("dataplane", dp)
+	span.LogObject("dataplane", fwd)
 
-	ctx = common.WithForwarder(ctx, dp)
-	ctx = common.WithRemoteMechanisms(ctx, cce.prepareRemoteMechanisms(request, dp))
+	ctx = common.WithForwarder(ctx, fwd)
+	ctx = common.WithRemoteMechanisms(ctx, cce.prepareRemoteMechanisms(request, fwd))
 	conn, connErr := common.ProcessNext(ctx, request)
 	if connErr != nil {
 		return conn, connErr
 	}
 
 	// We need to program forwarder.
-	return cce.programForwarder(ctx, conn, dp, clientConnection)
+	return cce.programForwarder(ctx, conn, fwd, clientConnection)
 }
 
 // prepareRemoteMechanisms fills mechanism properties
