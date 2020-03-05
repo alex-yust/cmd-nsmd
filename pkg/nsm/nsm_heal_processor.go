@@ -171,8 +171,6 @@ func (p *HealProcessor) serve() {
 			switch e.healState {
 			case nsm.HealStateDstDown:
 				healed = p.HealDstDown(ctx, e.cc)
-			case nsm.HealStateForwarderDown:
-				healed = p.healForwarderDown(ctx, e.cc)
 			case nsm.HealStateDstUpdate:
 				healed = p.healDstUpdate(ctx, e.cc)
 			case nsm.HealStateDstNmgrDown:
@@ -256,48 +254,6 @@ func (p *HealProcessor) HealDstDown(ctx context.Context, cc *model.ClientConnect
 		}
 	}
 	return false
-}
-
-func (p *HealProcessor) healForwarderDown(ctx context.Context, cc *model.ClientConnection) bool {
-	var cancel context.CancelFunc
-	ctx, cancel = context.WithTimeout(ctx, p.Props.HealTimeout)
-	defer cancel()
-
-	span := spanhelper.FromContext(ctx, "healForwarderDown")
-	defer span.Finish()
-
-	logger := span.Logger()
-	// Forwarder is down, we only need to re-programm forwarder.
-	// 1. Wait for forwarder to appear.
-	logger.Infof("NSM_Heal(3.1) Waiting for Forwarder to recovery...")
-	if err := p.ServiceRegistry.WaitForForwarderAvailable(span.Context(), p.Model, p.Props.HealForwarderTimeout); err != nil {
-		err = errors.Errorf("NSM_Heal(3.1) Forwarder is not available on recovery for timeout %v: %v", p.Props.HealForwarderTimeout, err)
-		span.LogError(err)
-		return false
-	}
-	logger.Infof("NSM_Heal(3.2) Forwarder is now available...")
-
-	// 3.3. Set source connection down
-	p.Model.ApplyClientConnectionChanges(span.Context(), cc.GetID(), func(modelCC *model.ClientConnection) {
-		modelCC.Xcon.Source.State = networkservice.State_DOWN
-	})
-
-	if cc.Xcon.GetRemoteSource() != nil {
-		// NSMd id remote one, we just need to close and return.
-		// Recovery will be performed by NSM client side.
-		logger.Infof("NSM_Heal(3.4)  Healing will be continued on source side...")
-		return true
-	}
-
-	request := cc.Request.Clone()
-	request.SetRequestConnection(cc.GetConnectionSource())
-
-	if _, err := p.Manager.LocalManager(cc).Request(span.Context(), cc.Request); err != nil {
-		logger.Errorf("NSM_Heal(3.5) Failed to heal connection: %v", err)
-		return false
-	}
-
-	return true
 }
 
 func (p *HealProcessor) healDstUpdate(ctx context.Context, cc *model.ClientConnection) bool {

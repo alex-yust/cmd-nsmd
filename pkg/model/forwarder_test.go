@@ -12,11 +12,11 @@ import (
 	"github.com/networkservicemesh/api/pkg/api/networkservice"
 )
 
-func TestAddAndGetDp(t *testing.T) {
+func TestAddAndGetFwd(t *testing.T) {
 	g := NewWithT(t)
 
-	dp := &Forwarder{
-		RegisteredName: "dp1",
+	fwd := &Forwarder{
+		RegisteredName: "fwd1",
 		SocketLocation: "/socket",
 		LocalMechanisms: []*networkservice.Mechanism{
 			&networkservice.Mechanism{
@@ -38,25 +38,25 @@ func TestAddAndGetDp(t *testing.T) {
 	}
 
 	dd := newForwarderDomain()
-	dd.AddForwarder(context.Background(), dp)
-	getDp := dd.GetForwarder("dp1")
+	dd.AddForwarder(context.Background(), fwd)
+	getFwd := dd.GetForwarder("fwd1")
 
-	g.Expect(getDp.RegisteredName).To(Equal(dp.RegisteredName))
-	g.Expect(getDp.SocketLocation).To(Equal(dp.SocketLocation))
-	g.Expect(getDp.MechanismsConfigured).To(Equal(dp.MechanismsConfigured))
-	g.Expect(getDp.LocalMechanisms).To(Equal(dp.LocalMechanisms))
-	g.Expect(getDp.RemoteMechanisms).To(Equal(dp.RemoteMechanisms))
+	g.Expect(getFwd.RegisteredName).To(Equal(fwd.RegisteredName))
+	g.Expect(getFwd.SocketLocation).To(Equal(fwd.SocketLocation))
+	g.Expect(getFwd.MechanismsConfigured).To(Equal(fwd.MechanismsConfigured))
+	g.Expect(getFwd.LocalMechanisms).To(Equal(fwd.LocalMechanisms))
+	g.Expect(getFwd.RemoteMechanisms).To(Equal(fwd.RemoteMechanisms))
 
-	g.Expect(fmt.Sprintf("%p", getDp.LocalMechanisms)).ToNot(Equal(fmt.Sprintf("%p", dp.LocalMechanisms)))
-	g.Expect(fmt.Sprintf("%p", getDp.RemoteMechanisms)).ToNot(Equal(fmt.Sprintf("%p", dp.RemoteMechanisms)))
+	g.Expect(fmt.Sprintf("%p", getFwd.LocalMechanisms)).ToNot(Equal(fmt.Sprintf("%p", fwd.LocalMechanisms)))
+	g.Expect(fmt.Sprintf("%p", getFwd.RemoteMechanisms)).ToNot(Equal(fmt.Sprintf("%p", fwd.RemoteMechanisms)))
 }
 
-func TestDeleteDp(t *testing.T) {
+func TestDeleteFwd(t *testing.T) {
 	g := NewWithT(t)
 
 	dd := newForwarderDomain()
 	dd.AddForwarder(context.Background(), &Forwarder{
-		RegisteredName: "dp1",
+		RegisteredName: "fwd1",
 		SocketLocation: "/socket",
 		LocalMechanisms: []*networkservice.Mechanism{
 			&networkservice.Mechanism{
@@ -77,25 +77,25 @@ func TestDeleteDp(t *testing.T) {
 		MechanismsConfigured: true,
 	})
 
-	cc := dd.GetForwarder("dp1")
+	cc := dd.GetForwarder("fwd1")
 	g.Expect(cc).ToNot(BeNil())
 
-	dd.DeleteForwarder(context.Background(), "dp1")
+	dd.DeleteForwarder(context.Background(), "fwd1")
 
-	dpDel := dd.GetForwarder("dp1")
-	g.Expect(dpDel).To(BeNil())
+	fwdDel := dd.GetForwarder("fwd1")
+	g.Expect(fwdDel).To(BeNil())
 
 	dd.DeleteForwarder(context.Background(), "NotExistingId")
 }
 
-func TestSelectDp(t *testing.T) {
+func TestSelectFwd(t *testing.T) {
 	g := NewWithT(t)
 
 	amount := 5
 	dd := newForwarderDomain()
 	for i := 0; i < amount; i++ {
 		dd.AddForwarder(context.Background(), &Forwarder{
-			RegisteredName: fmt.Sprintf("dp%d", i),
+			RegisteredName: fmt.Sprintf("fwd%d", i),
 			SocketLocation: fmt.Sprintf("/socket-%d", i),
 			LocalMechanisms: []*networkservice.Mechanism{
 				&networkservice.Mechanism{
@@ -117,20 +117,20 @@ func TestSelectDp(t *testing.T) {
 		})
 	}
 
-	selector := func(dp *Forwarder) bool {
-		return dp.SocketLocation == "/socket-4"
+	selector := func(fwd *Forwarder) bool {
+		return fwd.SocketLocation == "/socket-4"
 	}
 
-	selectedDp, err := dd.SelectForwarder(selector)
+	selectedFwd, err := dd.SelectForwarder(selector)
 	g.Expect(err).To(BeNil())
-	g.Expect(selectedDp.RegisteredName).To(Equal("dp4"))
+	g.Expect(selectedFwd.RegisteredName).To(Equal("fwd4"))
 
-	emptySelector := func(dp *Forwarder) bool {
+	emptySelector := func(fwd *Forwarder) bool {
 		return false
 	}
-	selectedDp, err = dd.SelectForwarder(emptySelector)
+	selectedFwd, err = dd.SelectForwarder(emptySelector)
 	g.Expect(err.Error()).To(ContainSubstring("no appropriate forwarders found"))
-	g.Expect(selectedDp).To(BeNil())
+	g.Expect(selectedFwd).To(BeNil())
 
 	first, err := dd.SelectForwarder(nil)
 	g.Expect(err).To(BeNil())

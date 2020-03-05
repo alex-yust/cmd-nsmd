@@ -23,8 +23,6 @@ const (
 type Forwarder struct {
 	RegisteredName       string
 	SocketLocation       string
-	LocalMechanisms      []*networkservice.Mechanism
-	RemoteMechanisms     []*networkservice.Mechanism
 	MechanismsConfigured bool
 }
 
@@ -34,43 +32,11 @@ func (d *Forwarder) clone() cloneable {
 		return nil
 	}
 
-	lm := make([]*networkservice.Mechanism, 0, len(d.LocalMechanisms))
-	for _, m := range d.LocalMechanisms {
-		lm = append(lm, m.Clone())
-	}
-
-	rm := make([]*networkservice.Mechanism, 0, len(d.RemoteMechanisms))
-	for _, m := range d.RemoteMechanisms {
-		rm = append(rm, m.Clone())
-	}
-
 	return &Forwarder{
 		RegisteredName:       d.RegisteredName,
 		SocketLocation:       d.SocketLocation,
-		LocalMechanisms:      lm,
-		RemoteMechanisms:     rm,
 		MechanismsConfigured: d.MechanismsConfigured,
 	}
-}
-
-// SetLocalMechanisms sets forwarder local mechanisms
-func (d *Forwarder) SetLocalMechanisms(mechanisms []*networkservice.Mechanism) {
-	lm := make([]*networkservice.Mechanism, 0, len(mechanisms))
-	for _, m := range mechanisms {
-		lm = append(lm, m)
-	}
-
-	d.LocalMechanisms = lm
-}
-
-// SetRemoteMechanisms sets forwarder remote mechanisms
-func (d *Forwarder) SetRemoteMechanisms(mechanisms []*networkservice.Mechanism) {
-	rm := make([]*networkservice.Mechanism, 0, len(mechanisms))
-	for _, m := range mechanisms {
-		rm = append(rm, m)
-	}
-
-	d.RemoteMechanisms = rm
 }
 
 type forwarderDomain struct {

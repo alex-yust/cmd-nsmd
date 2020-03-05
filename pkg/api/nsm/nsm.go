@@ -53,12 +53,10 @@ const (
 	HealStateDstDown HealState = 1
 	// HealStateSrcDown is a case when source is down: most probable will not happen yet.
 	HealStateSrcDown HealState = 2
-	// HealStateForwarderDown is a case when local Forwarder is down: we need to heal NSE/Remote NSM and local Forwarder.
-	HealStateForwarderDown HealState = 3
 	// HealStateDstUpdate is a case when destination is updated: we need to re-program local Forwarder.
-	HealStateDstUpdate HealState = 4
+	HealStateDstUpdate HealState = 3
 	// HealStateDstNmgrDown is a case when destination and/or Remote NSM is down: we need to heal NSE/Remote NSM.
-	HealStateDstNmgrDown HealState = 5
+	HealStateDstNmgrDown HealState = 4
 )
 
 // NetworkServiceRequestManager - allow to provide local and remote service interfaces.

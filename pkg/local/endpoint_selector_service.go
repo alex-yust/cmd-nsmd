@@ -41,7 +41,7 @@ func (cce *endpointSelectorService) Request(ctx context.Context, request *networ
 	logger := common.Log(ctx)
 	span := spanhelper.GetSpanHelper(ctx)
 	clientConnection := common.ModelConnection(ctx)
-	dp := common.Forwarder(ctx)
+	fwd := common.Forwarder(ctx)
 
 	if clientConnection == nil {
 		return nil, errors.Errorf("client connection need to be passed")
@@ -50,7 +50,7 @@ func (cce *endpointSelectorService) Request(ctx context.Context, request *networ
 	// 4. Check if Heal/Update if we need to ask remote NSM or it is a just local mechanism change requested.
 	// true if we detect we need to request NSE to upgrade/update connection.
 	// 4.1 New Network service is requested, we need to close current connection and do re-request of NSE.
-	requestNSEOnUpdate := cce.checkNSEUpdateIsRequired(ctx, clientConnection, request, logger, dp)
+	requestNSEOnUpdate := cce.checkNSEUpdateIsRequired(ctx, clientConnection, request, logger, fwd)
 	span.LogObject("requestNSEOnUpdate", requestNSEOnUpdate)
 
 	// 7. do a Request() on NSE and select it.

@@ -40,14 +40,12 @@ func (cce *сrossConnectService) Request(ctx context.Context, request *networkse
 		return nil, err
 	}
 
-	// 7.2.6.2.4 create cross connection
-	dpAPIConnection := crossconnect.NewCrossConnect(
+	clientConnection.Xcon = crossconnect.NewCrossConnect(
 		request.Connection.GetId(),
 		endpoint.GetNetworkService().GetPayload(),
 		request.Connection,
 		endpointConnection,
 	)
-	clientConnection.Xcon = dpAPIConnection
 
 	return ProcessNext(ctx, request)
 }
