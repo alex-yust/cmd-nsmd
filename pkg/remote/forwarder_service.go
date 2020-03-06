@@ -56,15 +56,15 @@ type forwarderService struct {
 }
 
 func (cce *forwarderService) selectForwarder(request *networkservice.NetworkServiceRequest) (*model.Forwarder, error) {
-	dp, err := cce.model.SelectForwarder(func(dp *model.Forwarder) bool {
+	fwd, err := cce.model.SelectForwarder(func(fwd *model.Forwarder) bool {
 		for _, m := range request.GetRequestMechanismPreferences() {
-			if cce.findMechanism(dp.RemoteMechanisms, m.GetType()) != nil {
+			if cce.findMechanism(fwd.RemoteMechanisms, m.GetType()) != nil {
 				return true
 			}
 		}
 		return false
 	})
-	return dp, err
+	return fwd, err
 }
 func (cce *forwarderService) findMechanism(mechanismPreferences []*networkservice.Mechanism, mechanismType string) *networkservice.Mechanism {
 	for _, m := range mechanismPreferences {
@@ -75,14 +75,14 @@ func (cce *forwarderService) findMechanism(mechanismPreferences []*networkservic
 	return nil
 }
 
-func (cce *forwarderService) selectRemoteMechanism(request *networkservice.NetworkServiceRequest, dp *model.Forwarder) (*networkservice.Mechanism, error) {
+func (cce *forwarderService) selectRemoteMechanism(request *networkservice.NetworkServiceRequest, fwd *model.Forwarder) (*networkservice.Mechanism, error) {
 	var mechanism *networkservice.Mechanism
 	var dpMechanism *networkservice.Mechanism
 
 	if preferredMechanismName := PreferredRemoteMechanism.StringValue(); len(preferredMechanismName) > 0 {
 		for _, m := range request.GetRequestMechanismPreferences() {
 			if m.GetType() == preferredMechanismName {
-				if dpm := cce.findMechanism(dp.RemoteMechanisms, m.GetType()); dpm != nil {
+				if dpm := cce.findMechanism(fwd.RemoteMechanisms, m.GetType()); dpm != nil {
 					mechanism = m
 					dpMechanism = dpm
 					break
@@ -93,7 +93,7 @@ func (cce *forwarderService) selectRemoteMechanism(request *networkservice.Netwo
 
 	if mechanism == nil {
 		for _, m := range request.GetRequestMechanismPreferences() {
-			dpm := cce.findMechanism(dp.RemoteMechanisms, m.GetType())
+			dpm := cce.findMechanism(fwd.RemoteMechanisms, m.GetType())
 			if dpm != nil {
 				mechanism = m
 				dpMechanism = dpm
@@ -156,10 +156,10 @@ func (cce *forwarderService) configureSRv6Parameters(connectionID string, parame
 	parameters[srv6.DstLocalSID] = cce.serviceRegistry.SIDAllocator().SID(connectionID)
 }
 
-func (cce *forwarderService) updateMechanism(request *networkservice.NetworkServiceRequest, dp *model.Forwarder) error {
+func (cce *forwarderService) updateMechanism(request *networkservice.NetworkServiceRequest, fwd *model.Forwarder) error {
 	conn := request.GetConnection()
 	// 5.x
-	if m, err := cce.selectRemoteMechanism(request, dp); err == nil {
+	if m, err := cce.selectRemoteMechanism(request, fwd); err == nil {
 		conn.Mechanism = m.Clone()
 	} else {
 		return err
@@ -181,36 +181,35 @@ func (cce *forwarderService) Request(ctx context.Context, request *networkservic
 	span := spanhelper.GetSpanHelper(ctx)
 
 	clientConnection := common.ModelConnection(ctx)
-	// 3. get forwarder
 	if err := cce.serviceRegistry.WaitForForwarderAvailable(ctx, cce.model, ForwarderTimeout); err != nil {
 		logger.Errorf("Error waiting for forwarder: %v", err)
 		return nil, err
 	}
 
 	// TODO: We could iterate forwarders to match required one, if failed with first one.
-	dp, err := cce.selectForwarder(request)
+	fwd, err := cce.selectForwarder(request)
 	if err != nil {
 		return nil, err
 	}
 
 	// 5. Select a local forwarder and put it into conn object
-	err = cce.updateMechanism(request, dp)
+	err = cce.updateMechanism(request, fwd)
 	if err != nil {
 		// 5.1 Close forwarder connection, if had existing one and NSE is closed.
 		cce.doFailureClose(ctx)
 		return nil, errors.Errorf("NSM:(5.1) %v", err)
 	}
 
-	span.LogObject("dataplane", dp)
+	span.LogObject("forwarder", fwd)
 
-	ctx = common.WithForwarder(ctx, dp)
+	ctx = common.WithForwarder(ctx, fwd)
 	conn, connErr := common.ProcessNext(ctx, request)
 	if connErr != nil {
 		cce.doFailureClose(ctx)
 		return conn, connErr
 	}
 	// We need to program forwarder.
-	return cce.programForwarder(ctx, conn, dp, clientConnection)
+	return cce.programForwarder(ctx, conn, fwd, clientConnection)
 }
 
 func (cce *forwarderService) doFailureClose(ctx context.Context) {
@@ -245,8 +244,8 @@ func (cce *forwarderService) performClose(ctx context.Context, cc *model.ClientC
 	// Close endpoints, etc
 	if cc.ForwarderState != model.ForwarderStateNone {
 		logger.Info("NSM.Forwarder: Closing cross connection on forwarder...")
-		dp := cce.model.GetForwarder(cc.ForwarderRegisteredName)
-		forwarderClient, conn, err := cce.serviceRegistry.ForwarderConnection(ctx, dp)
+		fwd := cce.model.GetForwarder(cc.ForwarderRegisteredName)
+		forwarderClient, conn, err := cce.serviceRegistry.ForwarderConnection(ctx, fwd)
 		if err != nil {
 			logger.Error(err)
 			return err
@@ -264,11 +263,11 @@ func (cce *forwarderService) performClose(ctx context.Context, cc *model.ClientC
 	return nil
 }
 
-func (cce *forwarderService) programForwarder(ctx context.Context, conn *networkservice.Connection, dp *model.Forwarder, clientConnection *model.ClientConnection) (*networkservice.Connection, error) {
+func (cce *forwarderService) programForwarder(ctx context.Context, conn *networkservice.Connection, fwd *model.Forwarder, clientConnection *model.ClientConnection) (*networkservice.Connection, error) {
 	span := spanhelper.FromContext(ctx, "programForwarder")
 	defer span.Finish()
 	// We need to program forwarder.
-	forwarderClient, forwarderConn, err := cce.serviceRegistry.ForwarderConnection(ctx, dp)
+	forwarderClient, forwarderConn, err := cce.serviceRegistry.ForwarderConnection(ctx, fwd)
 	if err != nil {
 		span.Logger().Errorf("Error creating forwarder connection %v. Performing close", err)
 		cce.doFailureClose(span.Context())
@@ -333,10 +332,10 @@ func (cce *forwarderService) programForwarder(ctx context.Context, conn *network
 	}
 
 	// Update connection context if it updated from forwarder.
-	return cce.updateClientConnection(ctx, conn, clientConnection, dp)
+	return cce.updateClientConnection(ctx, conn, clientConnection, fwd)
 }
 
-func (cce *forwarderService) updateClientConnection(ctx context.Context, conn *networkservice.Connection, clientConnection *model.ClientConnection, dp *model.Forwarder) (*networkservice.Connection, error) {
+func (cce *forwarderService) updateClientConnection(ctx context.Context, conn *networkservice.Connection, clientConnection *model.ClientConnection, fwd *model.Forwarder) (*networkservice.Connection, error) {
 	// Update connection context if it updated from forwarder.
 	err := conn.UpdateContext(clientConnection.GetConnectionSource().GetContext())
 	if err != nil {
@@ -344,7 +343,7 @@ func (cce *forwarderService) updateClientConnection(ctx context.Context, conn *n
 		return nil, err
 	}
 
-	clientConnection.ForwarderRegisteredName = dp.RegisteredName
+	clientConnection.ForwarderRegisteredName = fwd.RegisteredName
 	clientConnection.ForwarderState = model.ForwarderStateReady
 	if clientConnection.GetConnectionDestination() != nil && clientConnection.GetConnectionDestination().GetContext() != nil {
 		conn.Context.EthernetContext = clientConnection.GetConnectionDestination().GetContext().EthernetContext

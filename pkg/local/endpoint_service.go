@@ -73,41 +73,40 @@ func (cce *endpointService) closeEndpoint(ctx context.Context, cc *model.ClientC
 
 func (cce *endpointService) Request(ctx context.Context, request *networkservice.NetworkServiceRequest) (*networkservice.Connection, error) {
 	logger := common.Log(ctx)
-	clientConnection := common.ModelConnection(ctx)
-	dp := common.Forwarder(ctx)
-	endpoint := common.Endpoint(ctx)
 
+	clientConnection := common.ModelConnection(ctx)
 	if clientConnection == nil {
 		return nil, errors.Errorf("client connection need to be passed")
 	}
-	client, err := cce.nseManager.CreateNSEClient(ctx, endpoint)
+	endpoint := common.Endpoint(ctx)
+	nseClient, err := cce.nseManager.CreateNSEClient(ctx, endpoint)
 	if err != nil {
 		// 7.2.6.1
 		return nil, errors.Errorf("NSM:(7.2.6.1) Failed to create NSE Client. %v", err)
 	}
 	defer func() {
-		if cleanupErr := client.Cleanup(); cleanupErr != nil {
+		if cleanupErr := nseClient.Cleanup(); cleanupErr != nil {
 			logger.Errorf("NSM:(7.2.6.2) Error during Cleanup: %v", cleanupErr)
 		}
 	}()
 
-	var message *networkservice.NetworkServiceRequest
+	var nseRequest *networkservice.NetworkServiceRequest
 	if cce.nseManager.IsLocalEndpoint(endpoint) {
-		message = cce.createLocalNSERequest(endpoint, request.Connection, dp.LocalMechanisms, clientConnection)
+		nseRequest = cce.createLocalNSERequest(endpoint, request.Connection, request.MechanismPreferences, clientConnection)
 	} else {
-		message = cce.createRemoteNSMRequest(endpoint, request.Connection, common.RemoteMechanisms(ctx), clientConnection)
+		nseRequest = cce.createRemoteNSMRequest(endpoint, request.Connection, request.MechanismPreferences, clientConnection)
 	}
-	logger.Infof("NSM:(7.2.6.2) Requesting NSE with request %v", message)
+	logger.Infof("NSM:(7.2.6.2) Requesting NSE with request %v", nseRequest)
 
 	span := spanhelper.FromContext(ctx, "nse.request")
 	ctx = span.Context()
 	defer span.Finish()
-	span.LogObject("nse.request", message)
+	span.LogObject("nse.request", nseRequest)
 
-	nseConn, e := client.Request(ctx, message)
+	nseConn, e := nseClient.Request(ctx, nseRequest)
 	span.LogObject("nse.response", nseConn)
 	if e != nil {
-		e = errors.Errorf("NSM:(7.2.6.2.1) error requesting networkservice from %+v with message %#v error: %s", endpoint, message, e)
+		e = errors.Errorf("NSM:(7.2.6.2.1) error requesting networkservice from %+v with request %#v error: %s", endpoint, nseRequest, e)
 		span.LogError(e)
 		return nil, e
 	}

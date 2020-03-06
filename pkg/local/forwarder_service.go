@@ -86,13 +86,8 @@ func (cce *forwarderService) Request(ctx context.Context, request *networkservic
 		return nil, errors.New("No forwarders found")
 	}
 
-	for _, fwdNSE := range xconnNSEs {
-		logger.Infof("Forwarder candidate: %v", fwdNSE)
-		endpoint := cce.model.GetEndpoint(fwdNSE.GetName())
-		if endpoint == nil {
-			logger.Errorf("Forwarder endpoint not found: %s", fwdNSE.GetName())
-			continue
-		}
+	for _, endpoint := range xconnNSEs {
+		logger.Infof("Forwarder candidate: %v", endpoint)
 		fwdClient, _, err := cce.serviceRegistry.EndpointConnection(ctx, endpoint)
 		if err != nil {
 			logger.Errorf("Failed to connect forwarde: %v", err)
@@ -100,7 +95,7 @@ func (cce *forwarderService) Request(ctx context.Context, request *networkservic
 		}
 		conn, fwdErr := fwdClient.Request(ctx, request)
 		if fwdErr != nil {
-			logger.Errorf("failed to use forwarder %s: %v", fwdNSE.Name, fwdErr)
+			logger.Errorf("failed to use forwarder %s: %v", endpoint.EndpointName(), fwdErr)
 			continue
 		}
 
@@ -120,21 +115,25 @@ func (cce *forwarderService) Request(ctx context.Context, request *networkservic
 	return nil, errors.Errorf("Failed to provide a valid forwarder for request: %v", request)
 }
 
-// prepareRemoteMechanisms fills mechanism properties
 func (cce *forwarderService) prepareRemoteMechanisms(request *networkservice.NetworkServiceRequest) []*networkservice.Mechanism {
-	m := request.Connection.Mechanism.Clone()
-	switch m.GetType() {
-	case srv6.MECHANISM:
-		parameters := m.GetParameters()
-		if parameters == nil {
-			parameters = map[string]string{}
+	mechanisms := []*networkservice.Mechanism{}
+
+	for _, mechanism := range request.MechanismPreferences {
+		m := mechanism.Clone()
+		switch m.GetType() {
+		case srv6.MECHANISM:
+			parameters := m.GetParameters()
+			if parameters == nil {
+				parameters = map[string]string{}
+			}
+			parameters[srv6.SrcBSID] = cce.serviceRegistry.SIDAllocator().SID(request.Connection.GetId())
+			parameters[srv6.SrcLocalSID] = cce.serviceRegistry.SIDAllocator().SID(request.Connection.GetId())
+			m.Parameters = parameters
 		}
-		parameters[srv6.SrcBSID] = cce.serviceRegistry.SIDAllocator().SID(request.Connection.GetId())
-		parameters[srv6.SrcLocalSID] = cce.serviceRegistry.SIDAllocator().SID(request.Connection.GetId())
-		m.Parameters = parameters
+		mechanisms = append(mechanisms, m)
 	}
 
-	return []*networkservice.Mechanism{m}
+	return mechanisms
 }
 
 func (cce *forwarderService) Close(ctx context.Context, conn *networkservice.Connection) (*empty.Empty, error) {

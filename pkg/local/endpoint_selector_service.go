@@ -37,12 +37,11 @@ type endpointSelectorService struct {
 	nseManager nsm.NetworkServiceEndpointManager
 }
 
-func (cce *endpointSelectorService) Request(ctx context.Context, request *networkservice.NetworkServiceRequest) (*networkservice.Connection, error) {
+func (es *endpointSelectorService) Request(ctx context.Context, request *networkservice.NetworkServiceRequest) (*networkservice.Connection, error) {
 	logger := common.Log(ctx)
 	span := spanhelper.GetSpanHelper(ctx)
-	clientConnection := common.ModelConnection(ctx)
-	fwd := common.Forwarder(ctx)
 
+	clientConnection := common.ModelConnection(ctx)
 	if clientConnection == nil {
 		return nil, errors.Errorf("client connection need to be passed")
 	}
@@ -50,12 +49,12 @@ func (cce *endpointSelectorService) Request(ctx context.Context, request *networ
 	// 4. Check if Heal/Update if we need to ask remote NSM or it is a just local mechanism change requested.
 	// true if we detect we need to request NSE to upgrade/update connection.
 	// 4.1 New Network service is requested, we need to close current connection and do re-request of NSE.
-	requestNSEOnUpdate := cce.checkNSEUpdateIsRequired(ctx, clientConnection, request, logger, fwd)
+	requestNSEOnUpdate := es.checkNSEUpdateIsRequired(ctx, clientConnection, request, logger)
 	span.LogObject("requestNSEOnUpdate", requestNSEOnUpdate)
 
 	// 7. do a Request() on NSE and select it.
 	if clientConnection.ConnectionState == model.ClientConnectionHealing && !requestNSEOnUpdate {
-		return cce.checkUpdateConnectionContext(ctx, request, clientConnection)
+		return es.checkUpdateConnectionContext(ctx, request, clientConnection)
 	}
 
 	// 7.1 try find NSE and do a Request to it.
@@ -71,12 +70,12 @@ func (cce *endpointSelectorService) Request(ctx context.Context, request *networ
 		ctx = common.WithLog(span.Context(), logger)
 
 		// 7.1.1 Clone Connection to support iteration via EndPoints
-		newRequest, endpoint, err := cce.prepareRequest(ctx, request, clientConnection, ignoreEndpoints)
+		newRequest, endpoint, err := es.prepareRequest(ctx, request, clientConnection, ignoreEndpoints)
 		if err != nil {
 			span.Finish()
-			return cce.combineErrors(span, lastError, err)
+			return es.combineErrors(span, lastError, err)
 		}
-		if err = cce.checkTimeout(parentCtx, span); err != nil {
+		if err = es.checkTimeout(parentCtx, span); err != nil {
 			span.Finish()
 			return nil, err
 		}
@@ -96,7 +95,7 @@ func (cce *endpointSelectorService) Request(ctx context.Context, request *networ
 		}
 		// We could put endpoint to clientConnection.
 		clientConnection.Endpoint = endpoint
-		if !cce.nseManager.IsLocalEndpoint(endpoint) {
+		if !es.nseManager.IsLocalEndpoint(endpoint) {
 			clientConnection.RemoteNsm = endpoint.GetNetworkServiceManager()
 		}
 		// 7.1.9 We are fine with NSE connection and could continue.
@@ -105,7 +104,7 @@ func (cce *endpointSelectorService) Request(ctx context.Context, request *networ
 	}
 }
 
-func (cce *endpointSelectorService) combineErrors(span spanhelper.SpanHelper, err, lastError error) (*networkservice.Connection, error) {
+func (es *endpointSelectorService) combineErrors(span spanhelper.SpanHelper, err, lastError error) (*networkservice.Connection, error) {
 	if lastError != nil {
 		span.LogError(lastError)
 		return nil, errors.Errorf("NSM:(7.1.5) %v. Last NSE Error: %v", err, lastError)
@@ -113,7 +112,7 @@ func (cce *endpointSelectorService) combineErrors(span spanhelper.SpanHelper, er
 	return nil, err
 }
 
-func (cce *endpointSelectorService) selectEndpoint(ctx context.Context, clientConnection *model.ClientConnection, ignoreEndpoints map[registry.EndpointNSMName]*registry.NSERegistration, nseConn *networkservice.Connection) (*registry.NSERegistration, error) {
+func (es *endpointSelectorService) selectEndpoint(ctx context.Context, clientConnection *model.ClientConnection, ignoreEndpoints map[registry.EndpointNSMName]*registry.NSERegistration, nseConn *networkservice.Connection) (*registry.NSERegistration, error) {
 	var endpoint *registry.NSERegistration
 	if clientConnection.ConnectionState == model.ClientConnectionHealing {
 		// 7.1.2 Check previous endpoint, and it we will be able to contact it, it should be fine.
@@ -129,12 +128,12 @@ func (cce *endpointSelectorService) selectEndpoint(ctx context.Context, clientCo
 	// 7.1.3 Check if endpoint is not ignored yet
 	if endpoint == nil {
 		// 7.1.4 Choose a new endpoint
-		return cce.nseManager.GetEndpoint(ctx, nseConn, ignoreEndpoints)
+		return es.nseManager.GetEndpoint(ctx, nseConn, ignoreEndpoints)
 	}
 	return endpoint, nil
 }
 
-func (cce *endpointSelectorService) checkNSEUpdateIsRequired(ctx context.Context, clientConnection *model.ClientConnection, request *networkservice.NetworkServiceRequest, logger logrus.FieldLogger, dp *model.Forwarder) bool {
+func (es *endpointSelectorService) checkNSEUpdateIsRequired(ctx context.Context, clientConnection *model.ClientConnection, request *networkservice.NetworkServiceRequest, logger logrus.FieldLogger) bool {
 	requestNSEOnUpdate := false
 	if clientConnection.ConnectionState == model.ClientConnectionHealing {
 		if request.Connection.GetNetworkService() != clientConnection.GetNetworkService() {
@@ -146,8 +145,9 @@ func (cce *endpointSelectorService) checkNSEUpdateIsRequired(ctx context.Context
 				logger.Errorf("NSM:(4.1) Error during close of NSE during Request.Upgrade %v Existing connection: %v error %v", request, clientConnection, err)
 			}
 		} else {
+			fwd := common.Forwarder(ctx)
 			// 4.2 Check if NSE is still required, if some more context requests are different.
-			requestNSEOnUpdate = cce.checkNeedNSERequest(logger, request.Connection, clientConnection, dp)
+			requestNSEOnUpdate = es.checkNeedNSERequest(logger, request, clientConnection, fwd)
 			if requestNSEOnUpdate {
 				logger.Infof("Context is different, NSE request is required")
 			}
@@ -156,12 +156,12 @@ func (cce *endpointSelectorService) checkNSEUpdateIsRequired(ctx context.Context
 	return requestNSEOnUpdate
 }
 
-func (cce *endpointSelectorService) validateConnection(_ context.Context, conn *networkservice.Connection) error {
+func (es *endpointSelectorService) validateConnection(_ context.Context, conn *networkservice.Connection) error {
 	return conn.IsComplete()
 }
 
-func (cce *endpointSelectorService) updateConnectionContext(ctx context.Context, source, destination *networkservice.Connection) error {
-	if err := cce.validateConnection(ctx, destination); err != nil {
+func (es *endpointSelectorService) updateConnectionContext(ctx context.Context, source, destination *networkservice.Connection) error {
+	if err := es.validateConnection(ctx, destination); err != nil {
 		return err
 	}
 
@@ -175,33 +175,33 @@ func (cce *endpointSelectorService) updateConnectionContext(ctx context.Context,
 /**
 check if we need to do a NSE/Remote NSM request in case of our connection Upgrade/Healing procedure.
 */
-func (cce *endpointSelectorService) checkNeedNSERequest(logger logrus.FieldLogger, nsmConn *networkservice.Connection, existingCC *model.ClientConnection, dp *model.Forwarder) bool {
+func (es *endpointSelectorService) checkNeedNSERequest(logger logrus.FieldLogger, request *networkservice.NetworkServiceRequest, existingCC *model.ClientConnection, fwd *model.Forwarder) bool {
 	// 4.2.x
 	// 4.2.1 Check if context is changed, if changed we need to
-	if !proto.Equal(nsmConn.GetContext(), existingCC.GetConnectionSource().GetContext()) {
+	if !proto.Equal(request.GetConnection().GetContext(), existingCC.GetConnectionSource().GetContext()) {
 		return true
 	}
-	// We need to check, dp has mechanism changes in our Remote connection selected mechanism.
+	// We need to check, fwd has mechanism changes in our Remote connection selected mechanism.
 
 	if dst := existingCC.GetConnectionDestination(); dst.IsRemote() {
 		dstM := dst.GetMechanism()
 
 		// 4.2.2 Let's check if remote destination is matches our forwarder destination.
-		if dpM := cce.findMechanism(dp.RemoteMechanisms, dstM.GetType()); dpM != nil {
+		if reqM := es.findMechanism(request.GetMechanismPreferences(), dstM.GetType()); reqM != nil {
 			// 4.2.3 We need to check if source mechanism type and source parameters are different
-			for k, v := range dpM.GetParameters() {
+			for k, v := range reqM.GetParameters() {
 				rmV := dstM.GetParameters()[k]
 				if v != rmV {
 					logger.Infof("NSM:(4.2.3) Remote mechanism parameter %s was different with previous one : %v  %v", k, rmV, v)
 					return true
 				}
 			}
-			if !dpM.Equals(dstM) {
-				logger.Infof("NSM:(4.2.4)  Remote mechanism was different with previous selected one : %v  %v", dstM, dpM)
+			if !reqM.Equals(dstM) {
+				logger.Infof("NSM:(4.2.4)  Remote mechanism was different with previous selected one : %v  %v", dstM, reqM)
 				return true
 			}
 		} else {
-			logger.Infof("NSM:(4.2.5) Remote mechanism previously selected was not found: %v  in forwarder %v", dstM, dp.RemoteMechanisms)
+			logger.Infof("NSM:(4.2.5) Remote mechanism previously selected was not found: %v  in forwarder %v", dstM, request.GetMechanismPreferences())
 			return true
 		}
 	}
@@ -209,7 +209,7 @@ func (cce *endpointSelectorService) checkNeedNSERequest(logger logrus.FieldLogge
 	return false
 }
 
-func (cce *endpointSelectorService) findMechanism(mechanismPreferences []*networkservice.Mechanism, mechanismType string) *networkservice.Mechanism {
+func (es *endpointSelectorService) findMechanism(mechanismPreferences []*networkservice.Mechanism, mechanismType string) *networkservice.Mechanism {
 	for _, m := range mechanismPreferences {
 		if m.GetType() == mechanismType {
 			return m
@@ -218,11 +218,11 @@ func (cce *endpointSelectorService) findMechanism(mechanismPreferences []*networ
 	return nil
 }
 
-func (cce *endpointSelectorService) Close(ctx context.Context, connection *networkservice.Connection) (*empty.Empty, error) {
+func (es *endpointSelectorService) Close(ctx context.Context, connection *networkservice.Connection) (*empty.Empty, error) {
 	return common.ProcessClose(ctx, connection)
 }
 
-func (cce *endpointSelectorService) checkUpdateConnectionContext(ctx context.Context, request *networkservice.NetworkServiceRequest, clientConnection *model.ClientConnection) (*networkservice.Connection, error) {
+func (es *endpointSelectorService) checkUpdateConnectionContext(ctx context.Context, request *networkservice.NetworkServiceRequest, clientConnection *model.ClientConnection) (*networkservice.Connection, error) {
 	// We do not need to do request to endpoint and just need to update all stuff.
 	// 7.2 We do not need to access NSE, since all parameters are same.
 	logger := common.Log(ctx)
@@ -230,7 +230,7 @@ func (cce *endpointSelectorService) checkUpdateConnectionContext(ctx context.Con
 	clientConnection.Xcon.Source.State = networkservice.State_UP
 
 	// 7.3 Destination context probably has been changed, so we need to update source context.
-	if err := cce.updateConnectionContext(ctx, request.GetConnection(), clientConnection.GetConnectionDestination()); err != nil {
+	if err := es.updateConnectionContext(ctx, request.GetConnection(), clientConnection.GetConnectionDestination()); err != nil {
 		err = errors.Errorf("NSM:(7.3) Failed to update source connection context: %v", err)
 
 		// Just close since client connection is already passed with context
@@ -240,18 +240,18 @@ func (cce *endpointSelectorService) checkUpdateConnectionContext(ctx context.Con
 		return nil, err
 	}
 
-	if !cce.nseManager.IsLocalEndpoint(clientConnection.Endpoint) {
+	if !es.nseManager.IsLocalEndpoint(clientConnection.Endpoint) {
 		clientConnection.RemoteNsm = clientConnection.Endpoint.GetNetworkServiceManager()
 	}
 	return request.Connection, nil
 }
 
-func (cce *endpointSelectorService) prepareRequest(ctx context.Context, request *networkservice.NetworkServiceRequest, clientConnection *model.ClientConnection, ignoreEndpoints map[registry.EndpointNSMName]*registry.NSERegistration) (*networkservice.NetworkServiceRequest, *registry.NSERegistration, error) {
+func (es *endpointSelectorService) prepareRequest(ctx context.Context, request *networkservice.NetworkServiceRequest, clientConnection *model.ClientConnection, ignoreEndpoints map[registry.EndpointNSMName]*registry.NSERegistration) (*networkservice.NetworkServiceRequest, *registry.NSERegistration, error) {
 	newRequest := request.Clone()
 	nseConn := newRequest.Connection
 	span := spanhelper.GetSpanHelper(ctx)
 
-	endpoint, err := cce.selectEndpoint(ctx, clientConnection, ignoreEndpoints, nseConn)
+	endpoint, err := es.selectEndpoint(ctx, clientConnection, ignoreEndpoints, nseConn)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -265,7 +265,7 @@ func (cce *endpointSelectorService) prepareRequest(ctx context.Context, request 
 	return newRequest, endpoint, nil
 }
 
-func (cce *endpointSelectorService) checkTimeout(ctx context.Context, span spanhelper.SpanHelper) error {
+func (es *endpointSelectorService) checkTimeout(ctx context.Context, span spanhelper.SpanHelper) error {
 	if ctx.Err() != nil {
 		newErr := errors.Errorf("NSM:(7.1.0) Context timeout, during find/call NSE... %v", ctx.Err())
 		span.LogError(newErr)
